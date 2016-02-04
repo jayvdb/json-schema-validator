@@ -23,13 +23,18 @@ import sys
 
 from setuptools import setup, find_packages
 
+IS_PYPY = '__pypy__' in sys.builtin_module_names
+
 test_dependencies = [
     'testscenarios >= 0.1',
     'testtools >= 0.9.2'
 ]
 
 if sys.version_info[0] == 2:
-    test_dependencies.append('simplejson >= 2.0.9')
+    if IS_PYPY:
+        test_dependencies.append('PyYaml')
+    else:
+        test_dependencies.append('simplejson >= 2.0.9')
 
 setup(
     name='json-schema-validator',

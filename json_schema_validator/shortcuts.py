@@ -20,7 +20,13 @@
 One liners that make the code shorter
 """
 
+import sys
+
+IS_PYPY = '__pypy__' in sys.builtin_module_names
+
 try:
+    if IS_PYPY:
+        raise ImportError
     import simplejson as json
 except ImportError:
     import json

@@ -22,6 +22,8 @@ Unit tests for JSON schema
 
 import sys
 
+import json_schema_validator.shortcuts
+
 from testscenarios import TestWithScenarios
 from testtools import TestCase
 
@@ -30,6 +32,17 @@ from json_schema_validator.shortcuts import validate
 from json_schema_validator.validator import Validator
 
 PY2 = sys.version_info[0] == 2
+
+IS_PYPY = '__pypy__' in sys.builtin_module_names
+
+if PY2 and IS_PYPY:
+    import yaml
+
+    class json(object):
+
+        loads = staticmethod(yaml.safe_load)
+
+    json_schema_validator.shortcuts.json = json
 
 
 class ValidatorFailureTests(TestWithScenarios, TestCase):
@@ -111,7 +124,7 @@ class ValidatorFailureTests(TestWithScenarios, TestCase):
             'schema': '{"type": "boolean"}',
             'data': '""',
             'raises': ValidationError(
-                ('u' if PY2 else '') +
+                ('u' if PY2 and not IS_PYPY else '') +
                 "'' does not match type 'boolean'",
                 "Object has incorrect type (expected boolean)"),
             'object_expr': 'object',
@@ -175,7 +188,7 @@ class ValidatorFailureTests(TestWithScenarios, TestCase):
             'schema': '{"type": "null"}',
             'data': '""',
             'raises': ValidationError(
-                ('u' if PY2 else '') +
+                ('u' if PY2 and not IS_PYPY else '') +
                 "'' does not match type 'null'",
                 "Object has incorrect type (expected null)"),
             'object_expr': 'object',

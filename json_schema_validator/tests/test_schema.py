@@ -22,8 +22,18 @@ Unit tests for JSON schema
 
 import sys
 
+IS_PYPY = '__pypy__' in sys.builtin_module_names
+
 if sys.version_info[0] == 2:
-    import simplejson as json
+    if IS_PYPY:
+        import yaml
+
+        class json(object):
+
+            loads = staticmethod(yaml.safe_load)
+
+    else:
+        import simplejson as json
 else:
     import json
 
