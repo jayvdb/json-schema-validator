@@ -29,8 +29,6 @@ from json_schema_validator.errors import ValidationError
 from json_schema_validator.shortcuts import validate
 from json_schema_validator.validator import Validator
 
-PY2 = sys.version_info[0] == 2
-
 
 class ValidatorFailureTests(TestWithScenarios, TestCase):
 
@@ -111,7 +109,6 @@ class ValidatorFailureTests(TestWithScenarios, TestCase):
             'schema': '{"type": "boolean"}',
             'data': '""',
             'raises': ValidationError(
-                ('u' if PY2 else '') +
                 "'' does not match type 'boolean'",
                 "Object has incorrect type (expected boolean)"),
             'object_expr': 'object',
@@ -175,7 +172,6 @@ class ValidatorFailureTests(TestWithScenarios, TestCase):
             'schema': '{"type": "null"}',
             'data': '""',
             'raises': ValidationError(
-                ('u' if PY2 else '') +
                 "'' does not match type 'null'",
                 "Object has incorrect type (expected null)"),
             'object_expr': 'object',

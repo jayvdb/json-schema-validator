@@ -30,8 +30,10 @@ from json_schema_validator.errors import ValidationError
 from json_schema_validator.misc import NUMERIC_TYPES
 from json_schema_validator.schema import Schema
 
-if sys.version_info[0] > 2:
+PY2 = sys.version_info[0] <= 2
+if not PY2:
     basestring = (str, )
+    unicode = str
     zip_longest = itertools.zip_longest
 else:
     zip_longest = itertools.izip_longest
@@ -202,11 +204,19 @@ class Validator(object):
         if json_type == "any":
             return
         obj = self._object
+        if PY2 and isinstance(obj, unicode):
+            print('converting', obj)
+            try:
+                obj = str(obj)
+                print('converted', obj)
+            except UnicodeError:
+                pass
         if json_type == "boolean":
             # Bool is special cased because in python there is no
             # way to test for isinstance(something, bool) that would
             # not catch isinstance(1, bool) :/
             if obj is not True and obj is not False:
+                print('errr...', obj)
                 self._report_error(
                     "{obj!r} does not match type {type!r}".format(
                         obj=obj, type=json_type),

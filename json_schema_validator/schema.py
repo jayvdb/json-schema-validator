@@ -28,6 +28,7 @@ from json_schema_validator.misc import NUMERIC_TYPES
 
 if sys.version_info[0] > 2:
     basestring = (str, )
+    unicode = str
 
 
 class Schema(object):
@@ -74,12 +75,19 @@ class Schema(object):
                 "type value {0!r} is not a simple type name, nested "
                 "schema nor a list of those".format(value))
         if isinstance(value, list):
+            value = [str(_) if isinstance(_, unicode) else _ for _ in value]
             type_list = value
             # Union types have to have at least two alternatives
             if len(type_list) < 2:
+
                 raise SchemaError(
                     "union type {0!r} is too short".format(value))
         else:
+            if isinstance(value, unicode):
+                try:
+                    value = str(value)
+                except UnicodeError:
+                    pass
             type_list = [value]
         seen = set()
         for js_type in type_list:
@@ -90,6 +98,11 @@ class Schema(object):
                 # no nested validation here
                 pass
             else:
+                if isinstance(js_type, unicode):
+                    try:
+                        js_type = str(js_type)
+                    except UnicodeError:
+                        pass
                 if js_type in seen:
                     raise SchemaError(
                         ("type value {0!r} contains duplicate element"
@@ -123,6 +136,11 @@ class Schema(object):
     def items(self):
         value = self._schema.get("items", {})
         if not isinstance(value, (list, dict)):
+            if isinstance(value, unicode):
+                try:
+                    value = str(value)
+                except UnicodeError:
+                    pass
             raise SchemaError(
                 "items value {0!r} is neither a list nor an object".
                 format(value))
@@ -132,6 +150,11 @@ class Schema(object):
     def optional(self):
         value = self._schema.get("optional", False)
         if value is not False and value is not True:
+            if isinstance(value, unicode):
+                try:
+                    value = str(value)
+                except UnicodeError:
+                    pass
             raise SchemaError(
                 "optional value {0!r} is not a boolean".format(value))
         return value
@@ -140,6 +163,11 @@ class Schema(object):
     def additionalProperties(self):
         value = self._schema.get("additionalProperties", {})
         if not isinstance(value, dict) and value is not False:
+            if isinstance(value, unicode):
+                try:
+                    value = str(value)
+                except UnicodeError:
+                    pass
             raise SchemaError(
                 "additionalProperties value {0!r} is neither false nor"
                 " an object".format(value))
@@ -160,6 +188,11 @@ class Schema(object):
         if value is None:
             return
         if not isinstance(value, NUMERIC_TYPES):
+            if isinstance(value, unicode):
+                try:
+                    value = str(value)
+                except UnicodeError:
+                    pass
             raise SchemaError(
                 "minimum value {0!r} is not a numeric type".format(
                     value))
@@ -171,6 +204,11 @@ class Schema(object):
         if value is None:
             return
         if not isinstance(value, NUMERIC_TYPES):
+            if isinstance(value, unicode):
+                try:
+                    value = str(value)
+                except UnicodeError:
+                    pass
             raise SchemaError(
                 "maximum value {0!r} is not a numeric type".format(
                     value))
@@ -182,6 +220,11 @@ class Schema(object):
             raise SchemaError("minimumCanEqual requires presence of minimum")
         value = self._schema.get("minimumCanEqual", True)
         if value is not True and value is not False:
+            if isinstance(value, unicode):
+                try:
+                    value = str(value)
+                except UnicodeError:
+                    pass
             raise SchemaError(
                 "minimumCanEqual value {0!r} is not a boolean".format(
                     value))
@@ -193,6 +236,11 @@ class Schema(object):
             raise SchemaError("maximumCanEqual requires presence of maximum")
         value = self._schema.get("maximumCanEqual", True)
         if value is not True and value is not False:
+            if isinstance(value, unicode):
+                try:
+                    value = str(value)
+                except UnicodeError:
+                    pass
             raise SchemaError(
                 "maximumCanEqual value {0!r} is not a boolean".format(
                     value))
@@ -202,6 +250,11 @@ class Schema(object):
     def minItems(self):
         value = self._schema.get("minItems", 0)
         if not isinstance(value, int):
+            if isinstance(value, unicode):
+                try:
+                    value = str(value)
+                except UnicodeError:
+                    pass
             raise SchemaError(
                 "minItems value {0!r} is not an integer".format(value))
         if value < 0:
@@ -215,6 +268,11 @@ class Schema(object):
         if value is None:
             return
         if not isinstance(value, int):
+            if isinstance(value, unicode):
+                try:
+                    value = str(value)
+                except Exception:
+                    pass
             raise SchemaError(
                 "maxItems value {0!r} is not an integer".format(value))
         return value
@@ -223,6 +281,11 @@ class Schema(object):
     def uniqueItems(self):
         value = self._schema.get("uniqueItems", False)
         if value is not True and value is not False:
+            if isinstance(value, unicode):
+                try:
+                    value = str(value)
+                except UnicodeError:
+                    pass
             raise SchemaError(
                 "uniqueItems value {0!r} is not a boolean".format(value))
         return value
@@ -245,6 +308,7 @@ class Schema(object):
         try:
             return re.compile(value)
         except re.error as ex:
+            value = str(value)
             raise SchemaError(
                 "pattern value {0!r} is not a valid regular expression:"
                 " {1}".format(value, str(ex)))
@@ -253,6 +317,11 @@ class Schema(object):
     def minLength(self):
         value = self._schema.get("minLength", 0)
         if not isinstance(value, int):
+            if isinstance(value, unicode):
+                try:
+                    value = str(value)
+                except UnicodeError:
+                    pass
             raise SchemaError(
                 "minLength value {0!r} is not an integer".format(value))
         if value < 0:
@@ -266,6 +335,11 @@ class Schema(object):
         if value is None:
             return
         if not isinstance(value, int):
+            if isinstance(value, unicode):
+                try:
+                    value = str(value)
+                except UnicodeError:
+                    pass
             raise SchemaError(
                 "maxLength value {0!r} is not an integer".format(value))
         return value
@@ -282,8 +356,24 @@ class Schema(object):
         if value is None:
             return
         if not isinstance(value, list):
+            if isinstance(value, unicode):
+                try:
+                    value = str(value)
+                except UnicodeError:
+                    pass
             raise SchemaError(
                 "enum value {0!r} is not a list".format(value))
+
+        new_list = []
+        for item in value:
+            if isinstance(item, unicode):
+                try:
+                    item = str(item)
+                except UnicodeError:
+                    pass
+            new_list.append(item)
+        value = new_list
+
         if len(value) == 0:
             raise SchemaError(
                 "enum value {0!r} does not contain any"
@@ -291,6 +381,12 @@ class Schema(object):
         seen = set()
         for item in value:
             if item in seen:
+                if isinstance(value, unicode):
+                    try:
+                        item = str(item)
+                        value = [str(_) for _ in value]
+                    except UnicodeError:
+                        pass
                 raise SchemaError(
                     "enum value {0!r} contains duplicate element"
                     " {1!r}".format(value, item))
@@ -331,6 +427,10 @@ class Schema(object):
             'regex',
         ]:
             return value
+        try:
+            value = str(value)
+        except UnicodeError:
+            pass
         raise NotImplementedError(
             "format value {0!r} is not supported".format(value))
 
@@ -339,6 +439,10 @@ class Schema(object):
         value = self._schema.get("contentEncoding", None)
         if value is None:
             return
+        try:
+            value = str(value)
+        except UnicodeError:
+            pass
         if value.lower() not in [
             "7bit", "8bit", "binary", "quoted-printable", "base64",
             "ietf-token", "x-token"]:
@@ -356,6 +460,11 @@ class Schema(object):
         value = self._schema.get("divisibleBy", 1)
         if value is None:
             return
+        if isinstance(value, unicode):
+            try:
+                value = str(value)
+            except UnicodeError:
+                pass
         if not isinstance(value, NUMERIC_TYPES):
             raise SchemaError(
                 "divisibleBy value {0!r} is not a numeric type".
@@ -376,9 +485,23 @@ class Schema(object):
                 "disallow value {0!r} is not a simple type name, nested "
                 "schema nor a list of those".format(value))
         if isinstance(value, list):
-            disallow_list = value
+            new_list = []
+            for item in value:
+                if isinstance(item, unicode):
+                    try:
+                        item = str(item)
+                    except UnicodeError:
+                        pass
+                new_list.append(item)
+            disallow_list = value = new_list
         else:
+            if isinstance(value, unicode):
+                try:
+                    value = str(value)
+                except UnicodeError:
+                    pass
             disallow_list = [value]
+
         seen = set()
         for js_disallow in disallow_list:
             if isinstance(js_disallow, dict):

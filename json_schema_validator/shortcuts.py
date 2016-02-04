@@ -20,7 +20,10 @@
 One liners that make the code shorter
 """
 
-import simplejson
+try:
+    import simplejson as json
+except ImportError:
+    import json
 
 from json_schema_validator.schema import Schema
 from json_schema_validator.validator import Validator
@@ -29,7 +32,8 @@ from json_schema_validator.validator import Validator
 def validate(schema_text, data_text):
     """
     Validate specified JSON text (data_text) with specified schema (schema
-    text). Both are converted to JSON objects with :func:`simplesjon.loads`.
+    text). Both are converted to JSON objects with :func:`simplejson.loads`
+    if present or :func:`json.loads`.
 
     :param schema_text:
         Text of the JSON schema to check against
@@ -44,6 +48,7 @@ def validate(schema_text, data_text):
     :raises:
         Whatever may be raised by simplejson (in particular
         :class:`simplejson.decoder.JSONDecoderError`, a subclass of :class:`ValueError`)
+        or json
     :raises:
         Whatever may be raised by
         :meth:`json_schema_validator.validator.Validator.validate`. In particular
@@ -52,6 +57,6 @@ def validate(schema_text, data_text):
 
 
     """
-    schema = Schema(simplejson.loads(schema_text))
-    data = simplejson.loads(data_text)
+    schema = Schema(json.loads(schema_text))
+    data = json.loads(data_text)
     return Validator.validate(schema, data)
