@@ -22,7 +22,10 @@ Unit tests for JSON schema
 
 import sys
 
-import simplejson
+if sys.version_info[0] == 2:
+    import simplejson as json
+else:
+    import json
 
 from testscenarios import TestWithScenarios
 from testtools import TestCase
@@ -775,7 +778,7 @@ class SchemaTests(TestWithScenarios, TestCase):
     ]
 
     def test_schema_attribute(self):
-        schema = Schema(simplejson.loads(self.schema))
+        schema = Schema(json.loads(self.schema))
         if hasattr(self, 'expected'):
             for attr, expected_value in self.expected.items():
                 self.assertEqual(
